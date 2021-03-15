@@ -34,17 +34,7 @@ def lambda_handler(event, context):
     local_output_filename = "/tmp/" + s3_destination_filename
     local_output_final_finalname = "/tmp/" + s3_destination_filename + "_moderated_final" 
     
-    print('LAMBDA EYES MODERATION - INPUT PARAMS: \n')
-    print('s3_source_bucket param: ' + s3_source_bucket + '\n')
-    print('s3_source_key param: ' + s3_source_key + '\n')
-    print('s3_source_basename param: ' + s3_source_basename + '\n')
-    print('s3_destination_filename param: ' + s3_destination_filename + '\n')
-    print('s3_destination_key param: ' + s3_destination_key + '\n')
-    print('local_input_filename param: ' + local_input_filename + '\n')
-    print('local_output_filename param: ' + local_output_filename + '\n')
-    print('local_output_final_finalname param: ' + local_output_final_finalname + '\n')
-    
-
+    #download image on lambda tmp area
     s3_client.download_file(s3_source_bucket, s3_source_key, local_input_filename)
 
     #Calling Rekognition for face analyis on the uploaded image
@@ -70,10 +60,6 @@ def lambda_handler(event, context):
         
         design_bbox(local_input_filename, l_width, l_high, l_left, l_top)
         
-        #ffmpeg_cmd1 = "/opt/bin/ffmpeg -i \"" + local_input_filename + "\" -vf drawbox=x=iw*" + str(left) + ":y=ih*" + str(top) + ":w=iw*" + str(width) + ":h=ih*" + str(high) + ":color=green@0.5:t=fill " + local_output_filename + file_ext
-        #print("FFMPEG Command 1: " + ffmpeg_cmd1)
-        #os.system(ffmpeg_cmd1)
-        
         r_width = float(re_high) - float(re_width)
         r_high = float(re_top) - float(re_left) + 0.01
         r_left = re_width
@@ -81,26 +67,9 @@ def lambda_handler(event, context):
         
         design_bbox(local_input_filename + file_ext, r_width, r_high, r_left, r_top)
         
-        #ffmpeg_cmd2 = "/opt/bin/ffmpeg -i \"" + local_input_filename + "\" -vf drawbox=x=iw*" + str(left) + ":y=ih*" + str(top) + ":w=iw*" + str(width) + ":h=ih*" + str(high) + ":color=red@0.5:t=fill " + local_output_final_finalname + file_ext
-        #print("FFMPEG Command 2: " + ffmpeg_cmd2)
-        #os.system(ffmpeg_cmd2)
-    
     try:
-        #command1 = shlex.split(ffmpeg_cmd)
-        #p1 = subprocess.run(command1, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-        print('LAMBDA EYES MODERATION - INPUT PARAMS: \n')
-        print('s3_source_bucket param: ' + s3_source_bucket + '\n')
-        print('s3_source_key param: ' + s3_source_key + '\n')
-        print('s3_source_basename param: ' + s3_source_basename + '\n')
-        print('s3_destination_filename param: ' + s3_destination_filename + '\n')
-        print('s3_destination_key param: ' + s3_destination_key + '\n')
-        print('local_input_filename param: ' + local_input_filename + '\n')
-        print('local_output_filename param: ' + local_output_filename + '\n')
-        print('local_output_final_finalname param: ' + local_output_final_finalname + '\n')
-
-        resp = s3_client.upload_file(local_input_filename + file_ext + file_ext, s3_source_bucket, s3_destination_key + file_ext)
-        #resp = s3_client.upload_file(local_output_final_finalname + file_ext, s3_source_bucket, s3_destination_key + file_ext)
+        
+        resp = s3_client.upload_file(local_input_filename + file_ext + file_ext, s3_source_bucket, s3_destination_key + file_ext)        
 
     except:
         print("An exception occurred in running ffmpeg command")
